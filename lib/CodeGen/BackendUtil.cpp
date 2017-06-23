@@ -148,13 +148,13 @@ private:
 static void addCheriCapDirectCallsPass(const PassManagerBuilder &Builder,
         PassManagerBase &PM) {
   if (Builder.OptLevel > 0)
-    PM.add(createMemCapDirectCallsPass());
+    PM.add(createCheriCapDirectCallsPass());
 }
 
 static void addCheriCapFoldIntrinsicsPass(const PassManagerBuilder &Builder,
         PassManagerBase &PM) {
   if (Builder.OptLevel > 0)
-    PM.add(createMemCapFoldIntrinsicsPass());
+    PM.add(createCheriCapFoldIntrinsicsPass());
 }
 
 static void addObjCARCAPElimPass(const PassManagerBuilder &Builder, PassManagerBase &PM) {
