@@ -3557,7 +3557,7 @@ ASTContext::getTypedefType(const TypedefNameDecl *Decl,
   if (IsMemCap) {
     if (const PointerType *PT = Canonical->getAs<PointerType>()) {
       // Create a copy of the typedef whose name is prefixed by "__cheri_" and
-      // whose underlying type is the memory_capability qualified version of
+      // whose underlying type is the cheri_capability qualified version of
       // the pointer type
       Canonical = getPointerType(PT->getPointeeType(), ASTContext::PIK_Capability);
       TypeSourceInfo *TInfo = getTrivialTypeSourceInfo(Canonical, Decl->getLocStart());
