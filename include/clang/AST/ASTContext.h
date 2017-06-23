@@ -1076,12 +1076,12 @@ private:
   QualType getPipeType(QualType T, bool ReadOnly) const;
 
 public:
-  /// \brief Return the uniqued reference to the type for a memory capability 
+  /// \brief Return the uniqued reference to the type for a CHERI capability 
   /// qualified type.
   ///
-  /// The resulting type has a union of the qualifiers from T and the memory 
+  /// The resulting type has a union of the qualifiers from T and the CHERI 
   /// capability qualifier. 
-  QualType getMemoryCapabilityQualType(QualType T) const;
+  QualType getCheriCapabilityQualType(QualType T) const;
 
   /// \brief Return the uniqued reference to the type for an address space
   /// qualified type with the specified type and address space.
@@ -1176,7 +1176,7 @@ public:
     return CanQualType::CreateUnsafe(getPointerType((QualType) T, PIK));
   }
 private:
-  bool shouldUseMemcap(PointerInterpretationKind PIK) const;
+  bool shouldUseCheriCap(PointerInterpretationKind PIK) const;
 public:
 
   /// \brief Return the uniqued reference to a type adjusted from the original
@@ -1346,7 +1346,7 @@ public:
   /// typedef-name decl.
   QualType getTypedefType(const TypedefNameDecl *Decl,
                           QualType Canon = QualType(),
-                          bool IsMemCap = false) const;
+                          bool IsCheriCap = false) const;
 
   QualType getRecordType(const RecordDecl *Decl) const;
 

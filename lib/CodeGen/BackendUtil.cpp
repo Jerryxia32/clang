@@ -145,13 +145,13 @@ private:
 };
 }
 
-static void addMemCapDirectCallsPass(const PassManagerBuilder &Builder,
+static void addCheriCapDirectCallsPass(const PassManagerBuilder &Builder,
         PassManagerBase &PM) {
   if (Builder.OptLevel > 0)
     PM.add(createMemCapDirectCallsPass());
 }
 
-static void addMemCapFoldIntrinsicsPass(const PassManagerBuilder &Builder,
+static void addCheriCapFoldIntrinsicsPass(const PassManagerBuilder &Builder,
         PassManagerBase &PM) {
   if (Builder.OptLevel > 0)
     PM.add(createMemCapFoldIntrinsicsPass());
@@ -532,11 +532,11 @@ void EmitAssemblyHelper::CreatePasses(legacy::PassManager &MPM,
                            addObjCARCOptPass);
   }
   PMBuilder.addExtension(PassManagerBuilder::EP_EarlyAsPossible,
-                         addMemCapDirectCallsPass);
+                         addCheriCapDirectCallsPass);
   PMBuilder.addExtension(PassManagerBuilder::EP_ModuleOptimizerEarly,
-                         addMemCapFoldIntrinsicsPass);
+                         addCheriCapFoldIntrinsicsPass);
   PMBuilder.addExtension(PassManagerBuilder::EP_ScalarOptimizerLate,
-                         addMemCapFoldIntrinsicsPass);
+                         addCheriCapFoldIntrinsicsPass);
 
   if (LangOpts.Sanitize.has(SanitizerKind::LocalBounds)) {
     PMBuilder.addExtension(PassManagerBuilder::EP_ScalarOptimizerLate,

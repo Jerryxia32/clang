@@ -1842,8 +1842,8 @@ TypeInfo ASTContext::getTypeInfoImpl(const Type *T) const {
    }
   case Type::BlockPointer: {
     if (Target->areAllPointersCapabilities()) {
-      Width = Target->getMemoryCapabilityWidth();
-      Align = Target->getMemoryCapabilityAlign();
+      Width = Target->getCheriCapabilityWidth();
+      Align = Target->getCheriCapabilityAlign();
     } else {
       unsigned AS = getTargetAddressSpace(
           cast<BlockPointerType>(T)->getPointeeType());
@@ -1857,8 +1857,8 @@ TypeInfo ASTContext::getTypeInfoImpl(const Type *T) const {
     // alignof and sizeof should never enter this code path here, so we go
     // the pointer route.
     if (Target->areAllPointersCapabilities()) {
-      Width = Target->getMemoryCapabilityWidth();
-      Align = Target->getMemoryCapabilityAlign();
+      Width = Target->getCheriCapabilityWidth();
+      Align = Target->getCheriCapabilityAlign();
     } else {
       unsigned AS = getTargetAddressSpace(
           cast<ReferenceType>(T)->getPointeeType());
@@ -1872,15 +1872,15 @@ TypeInfo ASTContext::getTypeInfoImpl(const Type *T) const {
     if (PointeeTy->isFunctionProtoType()) {
       auto FPT = PointeeTy->getAs<FunctionProtoType>();
       if (FPT->getCallConv() == CC_CheriCCallback) {
-        Width = Target->getMemoryCapabilityWidth() * 3;
-        Align = Target->getMemoryCapabilityAlign();
+        Width = Target->getCheriCapabilityWidth() * 3;
+        Align = Target->getCheriCapabilityAlign();
         break;
       }
     }
 
-    if (T->isMemoryCapabilityType(*this) || Target->areAllPointersCapabilities()) {
-      Width = Target->getMemoryCapabilityWidth();
-      Align = Target->getMemoryCapabilityAlign();
+    if (T->isCheriCapabilityType(*this) || Target->areAllPointersCapabilities()) {
+      Width = Target->getCheriCapabilityWidth();
+      Align = Target->getCheriCapabilityAlign();
     } else {
       unsigned AS = getTargetAddressSpace(PointeeTy);
       Width = Target->getPointerWidth(AS);
@@ -2526,7 +2526,7 @@ QualType ASTContext::getComplexType(QualType T) const {
   return QualType(New, 0);
 }
 
-bool ASTContext::shouldUseMemcap(PointerInterpretationKind PIK) const {
+bool ASTContext::shouldUseCheriCap(PointerInterpretationKind PIK) const {
   switch (PIK) {
     case PIK_Capability:
       return true;
@@ -2544,11 +2544,11 @@ bool ASTContext::shouldUseMemcap(PointerInterpretationKind PIK) const {
 /// getPointerType - Return the uniqued reference to the type for a pointer to
 /// the specified type.
 QualType ASTContext::getPointerType(QualType T, PointerInterpretationKind PIK) const {
-  bool isMemCap = shouldUseMemcap(PIK);
+  bool isCheriCap = shouldUseCheriCap(PIK);
   // Unique pointers, to guarantee there is only one pointer of a particular
   // structure.
   llvm::FoldingSetNodeID ID;
-  PointerType::Profile(ID, T, isMemCap);
+  PointerType::Profile(ID, T, isCheriCap);
 
   void *InsertPos = nullptr;
   if (PointerType *PT = PointerTypes.FindNodeOrInsertPos(ID, InsertPos))
@@ -2564,7 +2564,7 @@ QualType ASTContext::getPointerType(QualType T, PointerInterpretationKind PIK) c
     PointerType *NewIP = PointerTypes.FindNodeOrInsertPos(ID, InsertPos);
     assert(!NewIP && "Shouldn't be in the map!"); (void)NewIP;
   }
-  PointerType *New = new (*this, TypeAlignment) PointerType(T, Canonical, isMemCap);
+  PointerType *New = new (*this, TypeAlignment) PointerType(T, Canonical, isCheriCap);
   Types.push_back(New);
   PointerTypes.InsertNode(New, InsertPos);
   return QualType(New, 0);
@@ -2669,12 +2669,12 @@ ASTContext::getLValueReferenceType(QualType T, bool SpelledAsLValue, PointerInte
   assert(getCanonicalType(T) != OverloadTy && 
          "Unresolved overloaded function type");
   
-  bool isMemCap = shouldUseMemcap(PIK);
+  bool isCheriCap = shouldUseCheriCap(PIK);
 
   // Unique pointers, to guarantee there is only one pointer of a particular
   // structure.
   llvm::FoldingSetNodeID ID;
-  ReferenceType::Profile(ID, T, SpelledAsLValue, isMemCap);
+  ReferenceType::Profile(ID, T, SpelledAsLValue, isCheriCap);
 
   void *InsertPos = nullptr;
   if (LValueReferenceType *RT =
@@ -2699,7 +2699,7 @@ ASTContext::getLValueReferenceType(QualType T, bool SpelledAsLValue, PointerInte
   LValueReferenceType *New
     = new (*this, TypeAlignment) LValueReferenceType(T, Canonical,
                                                      SpelledAsLValue,
-                                                     isMemCap);
+                                                     isCheriCap);
   Types.push_back(New);
   LValueReferenceTypes.InsertNode(New, InsertPos);
 
@@ -2711,10 +2711,10 @@ ASTContext::getLValueReferenceType(QualType T, bool SpelledAsLValue, PointerInte
 QualType ASTContext::getRValueReferenceType(QualType T, PointerInterpretationKind PIK) const {
   // Unique pointers, to guarantee there is only one pointer of a particular
   // structure.
-  bool isMemCap = shouldUseMemcap(PIK);
+  bool isCheriCap = shouldUseCheriCap(PIK);
 
   llvm::FoldingSetNodeID ID;
-  ReferenceType::Profile(ID, T, false, isMemCap);
+  ReferenceType::Profile(ID, T, false, isCheriCap);
 
   void *InsertPos = nullptr;
   if (RValueReferenceType *RT =
@@ -2737,7 +2737,7 @@ QualType ASTContext::getRValueReferenceType(QualType T, PointerInterpretationKin
   }
 
   RValueReferenceType *New
-    = new (*this, TypeAlignment) RValueReferenceType(T, Canonical, isMemCap);
+    = new (*this, TypeAlignment) RValueReferenceType(T, Canonical, isCheriCap);
   Types.push_back(New);
   RValueReferenceTypes.InsertNode(New, InsertPos);
   return QualType(New, 0);
@@ -3548,20 +3548,20 @@ QualType ASTContext::getTypeDeclTypeSlow(const TypeDecl *Decl) const {
 QualType
 ASTContext::getTypedefType(const TypedefNameDecl *Decl,
                            QualType Canonical,
-                           bool IsMemCap) const {
-  if (IsMemCap && Decl->MemCapTypeForDecl) return QualType(Decl->MemCapTypeForDecl, 0);
-  if (!IsMemCap && Decl->TypeForDecl) return QualType(Decl->TypeForDecl, 0);
+                           bool IsCheriCap) const {
+  if (IsCheriCap && Decl->CheriCapTypeForDecl) return QualType(Decl->CheriCapTypeForDecl, 0);
+  if (!IsCheriCap && Decl->TypeForDecl) return QualType(Decl->TypeForDecl, 0);
 
   if (Canonical.isNull())
     Canonical = getCanonicalType(Decl->getUnderlyingType());
-  if (IsMemCap) {
+  if (IsCheriCap) {
     if (const PointerType *PT = Canonical->getAs<PointerType>()) {
       // Create a copy of the typedef whose name is prefixed by "__cheri_" and
       // whose underlying type is the cheri_capability qualified version of
       // the pointer type
       Canonical = getPointerType(PT->getPointeeType(), ASTContext::PIK_Capability);
       TypeSourceInfo *TInfo = getTrivialTypeSourceInfo(Canonical, Decl->getLocStart());
-      std::string typedefName = "__memcap_" + Decl->getNameAsString();
+      std::string typedefName = "__chericap_" + Decl->getNameAsString();
       TypedefDecl *NewDecl = TypedefDecl::Create(
           const_cast<ASTContext &>(*this),
           const_cast<DeclContext *>(Decl->getDeclContext()),
@@ -3575,8 +3575,8 @@ ASTContext::getTypedefType(const TypedefNameDecl *Decl,
   }
   TypedefType *newType = new(*this, TypeAlignment)
     TypedefType(Type::Typedef, Decl, Canonical);
-  if (IsMemCap)
-    Decl->MemCapTypeForDecl = newType;
+  if (IsCheriCap)
+    Decl->CheriCapTypeForDecl = newType;
   else
     Decl->TypeForDecl = newType;
   Types.push_back(newType);
@@ -8605,7 +8605,7 @@ unsigned ASTContext::getIntWidth(QualType T) const {
 unsigned ASTContext::getIntRange(QualType T) const {
   if (Target->SupportsCapabilities()) {
     if (T->isPointerType())
-     if (T->getAs<PointerType>()->isMemoryCapability())
+     if (T->getAs<PointerType>()->isCheriCapability())
       return Target->getPointerWidth(0);
     if (T->isBuiltinType()) {
       int K = T->getAs<BuiltinType>()->getKind();

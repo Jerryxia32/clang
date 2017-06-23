@@ -1692,7 +1692,7 @@ public:
   bool isFunctionNoProtoType() const { return getAs<FunctionNoProtoType>(); }
   bool isFunctionProtoType() const { return getAs<FunctionProtoType>(); }
   bool isPointerType() const;
-  bool isMemoryCapabilityType(const ASTContext &Context) const;
+  bool isCheriCapabilityType(const ASTContext &Context) const;
   bool isAnyPointerType() const;   // Any C pointer or ObjC object pointer
   bool isBlockPointerType() const;
   bool isVoidPointerType() const;
@@ -2232,14 +2232,14 @@ public:
 ///
 class PointerType : public Type, public llvm::FoldingSetNode {
   QualType PointeeType;
-  bool IsMemoryCapability : 1;
+  bool IsCheriCapability : 1;
 
-  PointerType(QualType Pointee, QualType CanonicalPtr, bool IsMemCap = false) :
+  PointerType(QualType Pointee, QualType CanonicalPtr, bool IsCheriCap = false) :
     Type(Pointer, CanonicalPtr, Pointee->isDependentType(),
          Pointee->isInstantiationDependentType(),
          Pointee->isVariablyModifiedType(),
          Pointee->containsUnexpandedParameterPack()),
-    PointeeType(Pointee), IsMemoryCapability(IsMemCap) {
+    PointeeType(Pointee), IsCheriCapability(IsCheriCap) {
   }
   friend class ASTContext;  // ASTContext creates these.
 
@@ -2247,7 +2247,7 @@ public:
 
   QualType getPointeeType() const { return PointeeType; }
 
-  bool isMemoryCapability() const { return IsMemoryCapability; }
+  bool isCheriCapability() const { return IsCheriCapability; }
 
   /// Returns true if address spaces of pointers overlap.
   /// OpenCL v2.0 defines conversion rules for pointers to different
@@ -2269,11 +2269,11 @@ public:
   QualType desugar() const { return QualType(this, 0); }
 
   void Profile(llvm::FoldingSetNodeID &ID) {
-    Profile(ID, getPointeeType(), isMemoryCapability());
+    Profile(ID, getPointeeType(), isCheriCapability());
   }
-  static void Profile(llvm::FoldingSetNodeID &ID, QualType Pointee, bool IsMemCap) {
+  static void Profile(llvm::FoldingSetNodeID &ID, QualType Pointee, bool IsCheriCap) {
     ID.AddPointer(Pointee.getAsOpaquePtr());
-    ID.AddBoolean(IsMemCap);
+    ID.AddBoolean(IsCheriCap);
   }
 
   static bool classof(const Type *T) { return T->getTypeClass() == Pointer; }
@@ -2372,16 +2372,16 @@ public:
 ///
 class ReferenceType : public Type, public llvm::FoldingSetNode {
   QualType PointeeType;
-  bool IsMemoryCapability : 1;
+  bool IsCheriCapability : 1;
 
 protected:
   ReferenceType(TypeClass tc, QualType Referencee, QualType CanonicalRef,
-                bool SpelledAsLValue, bool IsMemCap = false) :
+                bool SpelledAsLValue, bool IsCheriCap = false) :
     Type(tc, CanonicalRef, Referencee->isDependentType(),
          Referencee->isInstantiationDependentType(),
          Referencee->isVariablyModifiedType(),
          Referencee->containsUnexpandedParameterPack()),
-    PointeeType(Referencee), IsMemoryCapability(IsMemCap)
+    PointeeType(Referencee), IsCheriCapability(IsCheriCap)
   {
     ReferenceTypeBits.SpelledAsLValue = SpelledAsLValue;
     ReferenceTypeBits.InnerRef = Referencee->isReferenceType();
@@ -2400,18 +2400,18 @@ public:
     return T->PointeeType;
   }
 
-  bool isMemoryCapability() const { return IsMemoryCapability; }
+  bool isCheriCapability() const { return IsCheriCapability; }
 
   void Profile(llvm::FoldingSetNodeID &ID) {
-    Profile(ID, PointeeType, isSpelledAsLValue(), isMemoryCapability());
+    Profile(ID, PointeeType, isSpelledAsLValue(), isCheriCapability());
   }
   static void Profile(llvm::FoldingSetNodeID &ID,
                       QualType Referencee,
                       bool SpelledAsLValue,
-                      bool IsMemCap) {
+                      bool IsCheriCap) {
     ID.AddPointer(Referencee.getAsOpaquePtr());
     ID.AddBoolean(SpelledAsLValue);
-    ID.AddBoolean(IsMemCap);
+    ID.AddBoolean(IsCheriCap);
   }
 
   static bool classof(const Type *T) {
@@ -2424,8 +2424,8 @@ public:
 ///
 class LValueReferenceType : public ReferenceType {
   LValueReferenceType(QualType Referencee, QualType CanonicalRef,
-                      bool SpelledAsLValue, bool IsMemCap = false) :
-    ReferenceType(LValueReference, Referencee, CanonicalRef, SpelledAsLValue, IsMemCap)
+                      bool SpelledAsLValue, bool IsCheriCap = false) :
+    ReferenceType(LValueReference, Referencee, CanonicalRef, SpelledAsLValue, IsCheriCap)
   {}
   friend class ASTContext; // ASTContext creates these
 public:
@@ -2440,8 +2440,8 @@ public:
 /// An rvalue reference type, per C++11 [dcl.ref].
 ///
 class RValueReferenceType : public ReferenceType {
-  RValueReferenceType(QualType Referencee, QualType CanonicalRef, bool IsMemCap = false) :
-    ReferenceType(RValueReference, Referencee, CanonicalRef, false, IsMemCap) {
+  RValueReferenceType(QualType Referencee, QualType CanonicalRef, bool IsCheriCap = false) :
+    ReferenceType(RValueReference, Referencee, CanonicalRef, false, IsCheriCap) {
   }
   friend class ASTContext; // ASTContext creates these
 public:

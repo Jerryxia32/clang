@@ -382,11 +382,11 @@ bool Type::isStructureOrClassType() const {
   }
   return false;
 }
-bool Type::isMemoryCapabilityType(const ASTContext &Context) const {
+bool Type::isCheriCapabilityType(const ASTContext &Context) const {
   if (const PointerType *PT = getAs<PointerType>())
-    return PT->isMemoryCapability();
+    return PT->isCheriCapability();
   else if (const ReferenceType *RT = getAs<ReferenceType>())
-    return RT->isMemoryCapability();
+    return RT->isCheriCapability();
   else if (isObjCObjectPointerType() || isBlockPointerType())
     return Context.getTargetInfo().areAllPointersCapabilities();
   else if (const BuiltinType *BT = getAs<BuiltinType>()) {
@@ -397,7 +397,7 @@ bool Type::isMemoryCapabilityType(const ASTContext &Context) const {
     if (Kind == BuiltinType::ObjCId || Kind == BuiltinType::NullPtr)
       return Context.getTargetInfo().areAllPointersCapabilities();
   } else if (const AtomicType *AT = getAs<AtomicType>())
-    return AT->getValueType()->isMemoryCapabilityType(Context);
+    return AT->getValueType()->isCheriCapabilityType(Context);
   else if  (const MemberPointerType *MPT = getAs<MemberPointerType>())
     // XXXAR: Currently member function pointers contain capabities, but
     // pointers to member data don't

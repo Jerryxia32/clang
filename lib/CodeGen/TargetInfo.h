@@ -222,7 +222,7 @@ public:
 
   virtual unsigned getStackAS() const;
   
-  virtual unsigned getMemoryCapabilityAS() const { 
+  virtual unsigned getCheriCapabilityAS() const { 
     assert(0 && "Target does not support capabilities!\n");
     return 0;
   }

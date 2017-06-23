@@ -297,8 +297,8 @@ public:
   uint64_t getPointerWidth(unsigned AddrSpace) const {
     if (AddrSpace == 0) {
       if (areAllPointersCapabilities()) {
-        assert(getMemoryCapabilityWidth() == 128 || getMemoryCapabilityWidth() == 256);
-        return getMemoryCapabilityWidth();
+        assert(getCheriCapabilityWidth() == 128 || getCheriCapabilityWidth() == 256);
+        return getCheriCapabilityWidth();
       }
       return PointerWidth;
     }
@@ -308,7 +308,7 @@ public:
   /// where pointers are integers, this will be the same as the size.
   uint64_t getPointerRange(unsigned AddrSpace) const {
     if (AddrSpace == 0 && areAllPointersCapabilities()) {
-      return getPointerRangeForMemoryCapability();
+      return getPointerRangeForCheriCapability();
     }
     // Eventually we may want to special case AS0.
     return getPointerRangeV(AddrSpace);
@@ -316,8 +316,8 @@ public:
   uint64_t getPointerAlign(unsigned AddrSpace) const {
     if (AddrSpace == 0) {
       if (areAllPointersCapabilities()) {
-        assert(getMemoryCapabilityAlign() == 128 || getMemoryCapabilityAlign() == 256);
-        return getMemoryCapabilityAlign();
+        assert(getCheriCapabilityAlign() == 128 || getCheriCapabilityAlign() == 256);
+        return getCheriCapabilityAlign();
       }
       return PointerAlign;
     }
@@ -335,11 +335,11 @@ public:
     return 0;
   }
 
-  virtual uint64_t getMemoryCapabilityWidth() const { return -1; }
+  virtual uint64_t getCheriCapabilityWidth() const { return -1; }
 
-  virtual uint64_t getMemoryCapabilityAlign() const { return -1; }
+  virtual uint64_t getCheriCapabilityAlign() const { return -1; }
 
-  virtual uint64_t getPointerRangeForMemoryCapability() const { return -1; }
+  virtual uint64_t getPointerRangeForCheriCapability() const { return -1; }
 
   /// \brief Return the size of '_Bool' and C++ 'bool' for this target, in bits.
   unsigned getBoolWidth() const { return BoolWidth; }

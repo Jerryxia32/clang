@@ -2156,7 +2156,7 @@ static llvm::Value *EmitFunctionDeclPointer(CodeGenFunction &CGF,
   llvm::Value *V = CGM.GetAddrOfFunction(FD);
   auto &TI = CGF.getContext().getTargetInfo();
   if (TI.areAllPointersCapabilities()) {
-    unsigned CapAS = CGF.CGM.getTargetCodeGenInfo().getMemoryCapabilityAS();
+    unsigned CapAS = CGF.CGM.getTargetCodeGenInfo().getCheriCapabilityAS();
     llvm::Type *VTy = V->getType();
     if (VTy->getPointerAddressSpace() != CapAS) {
       llvm::Type *CapTy = cast<llvm::PointerType>(VTy)
@@ -3013,8 +3013,8 @@ Address CodeGenFunction::EmitArrayToPointerDecay(const Expr *E,
   if (PtrTy->getPointerAddressSpace() != AS) {
     if (getContext().getTargetInfo().areAllPointersCapabilities()) {
       assert(PtrTy->getPointerAddressSpace() == 
-                        CGM.getTargetCodeGenInfo().getMemoryCapabilityAS() &&
-             "Expected memory capability address space in pure capability ABI");
+                        CGM.getTargetCodeGenInfo().getCheriCapabilityAS() &&
+             "Expected CHERI capability address space in pure capability ABI");
       assert(E->getType().getAddressSpace() == 0 &&
              "non-zero address space in pure capability ABI");
       return Addr;

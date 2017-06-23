@@ -1733,11 +1733,11 @@ void ItaniumRecordLayoutBuilder::LayoutField(const FieldDecl *D,
     unsigned AS = RT->getPointeeType().getAddressSpace();
     FieldSize = 
       Context.toCharUnitsFromBits(TI.areAllPointersCapabilities()
-                                  ? TI.getMemoryCapabilityWidth()
+                                  ? TI.getCheriCapabilityWidth()
                                   : TI.getPointerWidth(AS));
     FieldAlign = 
       Context.toCharUnitsFromBits(TI.areAllPointersCapabilities()
-                                  ? TI.getMemoryCapabilityAlign()
+                                  ? TI.getCheriCapabilityAlign()
                                   : TI.getPointerAlign(AS));
   } else {
     std::pair<CharUnits, CharUnits> FieldInfo = 
