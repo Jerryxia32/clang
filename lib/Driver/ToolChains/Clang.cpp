@@ -1407,7 +1407,7 @@ void Clang::AddMIPSTargetArgs(const ArgList &Args,
   StringRef ABIName;
   const llvm::Triple &Triple = getToolChain().getTriple();
   mips::getMipsCPUAndABI(Args, Triple, CPUName, ABIName);
-  if (IsNonPic && ABIName == "purecap" && !isa<PreprocessJobAction>(JA)) {
+  if (IsNonPic && (ABIName == "purecap" || ABIName == "purecap32") && !isa<PreprocessJobAction>(JA)) {
     D.Diag(diag::warn_cheri_purecap_nopic_broken);
   }
 
@@ -1415,7 +1415,7 @@ void Clang::AddMIPSTargetArgs(const ArgList &Args,
   CmdArgs.push_back(ABIName.data());
 
   // Add warning about calling functions without prototypes in MIPS CHERI
-  if (Triple.getArch() == llvm::Triple::cheri && ABIName == "purecap")
+  if (Triple.getArch() == llvm::Triple::cheri && (ABIName == "purecap" || ABIName == "purecap32"))
     CmdArgs.push_back("-Wmips-cheri-prototypes");
 
   mips::FloatABI ABI = mips::getMipsFloatABI(D, Args);

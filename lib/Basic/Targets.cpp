@@ -7836,6 +7836,12 @@ public:
       ABI = "n64";
       return true;
     }
+    if (Name == "purecap32") {
+      setCapabilityABITypes();
+      CapabilityABI = true;
+      ABI = "n32";
+      return true;
+    }
     return false;
   }
 
