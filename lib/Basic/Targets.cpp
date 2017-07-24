@@ -7837,7 +7837,7 @@ public:
       return true;
     }
     if (Name == "purecap32") {
-      setCapabilityABITypes();
+      setCapabilityABITypes32();
       CapabilityABI = true;
       ABI = "n32";
       return true;
@@ -7885,6 +7885,11 @@ public:
 
   void setCapabilityABITypes() {
     setN64ABITypes();
+    IntPtrType = TargetInfo::SignedIntCap;
+  }
+
+  void setCapabilityABITypes32() {
+    setN32ABITypes();
     IntPtrType = TargetInfo::SignedIntCap;
   }
 
@@ -8324,7 +8329,7 @@ public:
 
   uint64_t getCHERICapabilityAlign() const override { return CapSize; }
 
-  uint64_t getPointerRangeForCHERICapability() const override { return 64; }
+  uint64_t getPointerRangeForCHERICapability() const override { return 32; }
 
   bool SupportsCapabilities() const override { return IsCHERI; }
 
